@@ -1,0 +1,10 @@
+---------------------------------------------------------
+Found 1 CUDA devices
+Device 0: NVIDIA GeForce RTX 3060 Ti
+   SMs:        38
+   Global mem: 7960 MB
+   CUDA Cap:   8.6
+---------------------------------------------------------
+Array size: 20000000
+Student GPU time: 16.826 ms
+Find_repeats outputs are correct!

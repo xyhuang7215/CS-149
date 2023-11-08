@@ -1,0 +1,16 @@
+Rendering to 1024x1024 image
+Loaded scene with 4 circles
+Loaded scene with 4 circles
+
+Running benchmark, 1 frames, beginning at frame 0 ...
+Dumping frames to output_xxx.ppm
+Copying image data from device
+Wrote image file output_0000.ppm
+Copying image data from device
+Mismatch detected at pixel [102][200], value = 0.500000, expected 0.750000 for color Green
+Mismatch detected at pixel [102][201], value = 0.500000, expected 0.750000 for color Green
+Mismatch detected at pixel [102][202], value = 0.500000, expected 0.750000 for color Green
+Mismatch detected at pixel [102][203], value = 0.500000, expected 0.750000 for color Green
+Mismatch detected at pixel [102][204], value = 0.500000, expected 0.750000 for color Green
+Mismatch detected at pixel [102][205], value = 0.500000, expected 0.750000 for color Green
+ERROR : Mismatch detected between reference and actual
