@@ -72,12 +72,8 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
 struct TASK {
     TASK() = default;
     
-    TASK (int LaunchID_, int total_task_num_, std::unordered_set<TaskID> deps_, IRunnable* runnable_) {
-        LaunchID = LaunchID_;
-        total_task_num = total_task_num_;
-        deps = deps_;
-        runnable = runnable_;
-
+    TASK (int LaunchID_, int total_task_num_, std::unordered_set<TaskID> deps_, IRunnable* runnable_) 
+    : LaunchID(LaunchID_), total_task_num(total_task_num_), deps(deps_), runnable(runnable_) {
         next_task_id = 0;
         finish_task_num = 0;
         wait_dep_num = deps.size();
@@ -102,8 +98,6 @@ struct TASK {
  * itasksys.h for documentation of the ITaskSystem interface.
  */
 class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
-    using JobPair = std::pair<int, std::function<void()>>;
-
     public:
         TaskSystemParallelThreadPoolSleeping(int num_threads);
         ~TaskSystemParallelThreadPoolSleeping();

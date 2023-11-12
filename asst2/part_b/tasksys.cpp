@@ -148,34 +148,35 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
             auto runnable = cur_launch.runnable;
             lock.unlock();
 
-            // run job
+            // Run the job
             if (id >= total_task_num) continue;
             runnable->runTask(id, total_task_num);
 
+            // Update metadata
             lock.lock();
             cur_launch.finish_task_num++;
 
-
+            // If current task is finished, pop it from ready queue and check dependencies
             if (cur_launch.finish_task_num == cur_launch.total_task_num) {
                 TaskID launchID = cur_launch.LaunchID;
                 fin_taskIDs.insert(launchID);
                 ready_launchs.pop();
 
-                std::vector<TaskID> new_ready_launch;
+                std::vector<TaskID> new_ready_launchs;
 
                 for (auto &launch_pair : wait_launchs) {
                     auto &wait_launch = launch_pair.second;
 
-                    if (wait_launch.deps.count(launchID)) {
+                    if (wait_launch.deps.find(launchID) != wait_launch.deps.end()) {
                         wait_launch.wait_dep_num--;
                     }
 
                     if (wait_launch.wait_dep_num == 0) {
-                        new_ready_launch.push_back(launch_pair.first);
+                        new_ready_launchs.push_back(launch_pair.first);
                     }
                 }
 
-                for (TaskID taskID : new_ready_launch) {
+                for (TaskID taskID : new_ready_launchs) {
                     ready_launchs.push(wait_launchs[taskID]);
                     wait_launchs.erase(taskID);
                 }
@@ -214,22 +215,19 @@ TaskSystemParallelThreadPoolSleeping::~TaskSystemParallelThreadPoolSleeping() {
 }
 
 void TaskSystemParallelThreadPoolSleeping::run(IRunnable* runnable, int num_total_tasks) {
-
-
     //
     // TODO: CS149 students will modify the implementation of this
     // method in Parts A and B.  The implementation provided below runs all
     // tasks sequentially on the calling thread.
     //
 
+    // Sync to make sure works are done
     runAsyncWithDeps(runnable, num_total_tasks, std::vector<TaskID>{});
     sync();
 }
 
 TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
                                                     const std::vector<TaskID>& deps) {
-
-
     //
     // TODO: CS149 students will implement this method in Part B.
     //
@@ -237,6 +235,7 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
     TaskID retID = nextTaskID;
     nextTaskID++;
 
+    // Check if the deps are finished, and transform remaining deps into unordered_map
     std::unordered_set<TaskID> new_deps;
     for (TaskID dep_id : deps) {
         if (!fin_taskIDs.count(dep_id))
@@ -245,20 +244,20 @@ TaskID TaskSystemParallelThreadPoolSleeping::runAsyncWithDeps(IRunnable* runnabl
 
     if (new_deps.size() == 0) {
         ready_launchs.push(TASK(retID, num_total_tasks, new_deps, runnable));
-        meta_lock.unlock();
         ready_condition.notify_all();
     }
     else {
-        wait_launchs.emplace(std::piecewise_construct,
-                        std::forward_as_tuple(retID),
-                        std::forward_as_tuple(retID, num_total_tasks, new_deps, runnable));
+        // wait_launchs.emplace(std::piecewise_construct,
+        //                 std::forward_as_tuple(retID),
+        //                 std::forward_as_tuple(retID, num_total_tasks, new_deps, runnable));
+        wait_launchs[retID] = TASK(retID, num_total_tasks, new_deps, runnable);
     }
 
+    meta_lock.unlock();
     return retID;
 }
 
 void TaskSystemParallelThreadPoolSleeping::sync() {
-
     //
     // TODO: CS149 students will modify the implementation of this method in Part B.
     //
