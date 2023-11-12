@@ -1,7 +1,7 @@
 # CS149
 
 This repo is my implementation of assignments of Stanford CS 149 : Parallel Computing (Fall 2020).\
-There's autograders for each assignment, so you can test on your machine.
+There's autograders for each assignment, so you can test on your machine.\
 Welcome to contact me if you have any questions.
 
 ---
