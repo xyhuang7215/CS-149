@@ -133,7 +133,7 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
-    auto func = [&] () {
+    auto worker = [&] () {
         while (true) {
             std::unique_lock<std::mutex> lock(meta_mutex);
             ready_condition.wait(lock, [&] {
@@ -191,7 +191,7 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
     };
     
     for (int i = 0; i < num_threads; i++) {
-        threads.emplace_back(std::thread(func));
+        threads.emplace_back(std::thread(worker));
     }
 }
 

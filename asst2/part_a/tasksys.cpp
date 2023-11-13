@@ -72,7 +72,7 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
 
     int next_work = 0;
 
-    auto runTask = [&] () {
+    auto worker = [&] () {
         while (true) {
             mutex->lock();
             int cur_work = next_work++;
@@ -87,7 +87,7 @@ void TaskSystemParallelSpawn::run(IRunnable* runnable, int num_total_tasks) {
     };
 
     for (int i = 0; i < num_threads; i++) {
-        threads[i] = std::thread(runTask);
+        threads[i] = std::thread(worker);
     }
 
     for (int i = 0; i < num_threads; i++) {
@@ -123,8 +123,7 @@ TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int n
     // (requiring changes to tasksys.h).
     //
 
-    auto func = [&] () {
-        std::function<void()> job;
+    auto worker = [&] () {
         while (true) {
             std::unique_lock<std::mutex> lock(status_mutex);
             mutex_condition.wait(lock, [&] {
@@ -137,7 +136,7 @@ TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int n
             int id = next_task_id++;
             lock.unlock();
 
-            // do job and update # of finished tasks
+            // Do the job and update # of finished tasks
             if (id < cur_num_total_tasks) {
                 cur_runnable->runTask(id, cur_num_total_tasks);
                 std::unique_lock<std::mutex> fin_lock(finish_mutex);
@@ -147,7 +146,7 @@ TaskSystemParallelThreadPoolSpinning::TaskSystemParallelThreadPoolSpinning(int n
     };
     
     for (int i = 0; i < num_threads; i++) {
-        threads.emplace_back(std::thread(func));
+        threads.emplace_back(std::thread(worker));
     }
 }
 
@@ -216,8 +215,7 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
     // Implementations are free to add new class member variables
     // (requiring changes to tasksys.h).
     //
-    auto func = [&] () {
-        std::function<void()> job;
+    auto worker = [&] () {
         while (true) {
             std::unique_lock<std::mutex> lock(status_mutex);
             mutex_condition.wait(lock, [&] {
@@ -246,7 +244,7 @@ TaskSystemParallelThreadPoolSleeping::TaskSystemParallelThreadPoolSleeping(int n
     };
     
     for (int i = 0; i < num_threads; i++) {
-        threads.emplace_back(std::thread(func));
+        threads.emplace_back(std::thread(worker));
     }
 }
 
