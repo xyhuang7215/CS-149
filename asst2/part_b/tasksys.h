@@ -111,9 +111,11 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
         std::vector<std::thread> threads;
         
         std::map<TaskID, TASK> wait_launchs;
-        std::queue<TASK> ready_launchs;
-        std::unordered_set<TaskID> fin_taskIDs;
-        int nextTaskID = 0;
+        std::map<TaskID, TASK> ready_launchs;
+        std::unordered_set<TaskID> finish_launchs;
+        
+        std::queue<TaskID> ready_queue;
+        int next_launch_id = 0;
 
         std::mutex meta_mutex;
         std::condition_variable ready_condition; // Allows threads to wait on new jobs or termination
