@@ -3,6 +3,7 @@
 #include <vector>
 
 typedef int TaskID;
+typedef int LaunchID;
 
 class IRunnable {
     public:

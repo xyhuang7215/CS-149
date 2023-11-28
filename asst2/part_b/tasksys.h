@@ -69,21 +69,21 @@ class TaskSystemParallelThreadPoolSpinning: public ITaskSystem {
  * Helper struct for manage Launch list
  */
 
-struct TASK {
-    TASK() = default;
+struct Launch {
+    Launch() = default;
     
-    TASK (int LaunchID_, int total_task_num_, std::unordered_set<TaskID> deps_, IRunnable* runnable_) 
-    : LaunchID(LaunchID_), total_task_num(total_task_num_), deps(deps_), runnable(runnable_) {
+    Launch (int launch_id_, int total_task_num_, std::unordered_set<LaunchID> deps_, IRunnable* runnable_) 
+    : launch_id(launch_id_), total_task_num(total_task_num_), deps(deps_), runnable(runnable_) {
         next_task_id = 0;
         finish_task_num = 0;
         wait_dep_num = deps.size();
     }
 
-    ~TASK () = default;
+    ~Launch () = default;
 
-    int LaunchID;
+    LaunchID launch_id;
     int total_task_num;
-    std::unordered_set<TaskID> deps;
+    std::unordered_set<LaunchID> deps;
     IRunnable* runnable;
     int next_task_id;
     int finish_task_num;
@@ -103,18 +103,18 @@ class TaskSystemParallelThreadPoolSleeping: public ITaskSystem {
         ~TaskSystemParallelThreadPoolSleeping();
         const char* name();
         void run(IRunnable* runnable, int num_total_tasks);
-        TaskID runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
-                                const std::vector<TaskID>& deps);
+        LaunchID runAsyncWithDeps(IRunnable* runnable, int num_total_tasks,
+                                const std::vector<LaunchID>& deps);
         void sync();
     
     private:
         std::vector<std::thread> threads;
         
-        std::map<TaskID, TASK> wait_launchs;
-        std::map<TaskID, TASK> ready_launchs;
-        std::unordered_set<TaskID> finish_launchs;
+        std::map<LaunchID, Launch> wait_launchs;
+        std::map<LaunchID, Launch> ready_launchs;
+        std::unordered_set<LaunchID> finish_launchs;
         
-        std::queue<TaskID> ready_queue;
+        std::queue<LaunchID> ready_queue;
         int next_launch_id = 0;
 
         std::mutex meta_mutex;
